@@ -157,31 +157,25 @@ function enableModalButtons(peopleData) {
  */
 function searchPeople(searchInput, peopleData) {
   const matchesFound = [];
-  /* Note: matchesNotFound is used later on as a way to differentiate between 2 distinct scenarios: 
-   
-      1) No matches due to an empty search bar (we want to show all people in this case)
-      2) No matches because the input text didn't garner any match (we want to display a "no matches found" message)*/
-  let matchesNotFound = 0;
-  for (let i = 0; i < peopleData.length; i++) {
-    const personFullName = `${peopleData[i].name.first} ${peopleData[i].name.last}`;
-    if (
-      searchInput.value.length !== 0 &&
-      personFullName.toLowerCase().includes(searchInput.value.toLowerCase())
-    ) {
-      matchesFound.push(peopleData[i]);
-    } else if (searchInput.value.length !== 0) {
-      matchesNotFound++;
+  if (searchInput.value !== "") {
+    for (let i = 0; i < peopleData.length; i++) {
+      const personFullName = `${peopleData[i].name.first} ${peopleData[i].name.last}`;
+      if (
+        personFullName.toLowerCase().includes(searchInput.value.toLowerCase())
+      ) {
+        matchesFound.push(peopleData[i]);
+      }
     }
-  }
-  if (matchesNotFound === peopleData.length) {
-    document.querySelector("#gallery").innerHTML = `
-  <div class="card">
-        <h3 class="card-name cap">No matches found</h3>
-  </div>
-  `;
-  } else if (matchesFound.length !== 0) {
-    displayPeople(matchesFound);
-    enableModalButtons(matchesFound);
+    if (matchesFound.length === 0) {
+      document.querySelector("#gallery").innerHTML = `
+      <div class="card">
+            <h3 class="card-name cap">No matches found</h3>
+      </div>
+      `;
+    } else {
+      displayPeople(matchesFound);
+      enableModalButtons(matchesFound);
+    }
   } else {
     displayPeople(peopleData);
     enableModalButtons(peopleData);
