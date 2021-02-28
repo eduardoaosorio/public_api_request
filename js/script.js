@@ -31,7 +31,8 @@ function checkStatus(response) {
  * @param {array} peopleData - Array containing person objects
  */
 function displayPeople(peopleData) {
-  document.querySelector("#gallery").innerHTML = "";
+  const galleryDiv = document.querySelector("#gallery");
+  galleryDiv.innerHTML = "";
   for (let i = 0; i < peopleData.length; i++) {
     const personDiv = `
       <div class="card" data-person-index="${i}">
@@ -45,11 +46,12 @@ function displayPeople(peopleData) {
         </div>
       </div>
       `;
-    document
-      .querySelector("#gallery")
-      .insertAdjacentHTML("beforeend", personDiv);
+    galleryDiv.insertAdjacentHTML("beforeend", personDiv);
     const currentCard = document.querySelectorAll(".card")[i];
-    currentCard.addEventListener("click", (e) => displayModal(peopleData, i));
+    currentCard.addEventListener("click", (e) => {
+      displayModal(peopleData, i);
+      enableModalButtons(peopleData);
+    });
   }
 }
 
@@ -60,11 +62,11 @@ function displayPeople(peopleData) {
  * @param {number} personIndex - index of the person object to be displayed in modal (index according to peopleData)
  */
 function displayModal(peopleData, personIndex) {
-  console.log(peopleData);
-  let modalDiv = `
+  const galleryDiv = document.querySelector("#gallery");
+  let modalHtml = `
   <div class="modal-container" data-person-index="${personIndex}">
     <div class="modal">
-        <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
+        <button type="button" id="modal-close-btn" class="modal-close-btn">&#215;</button>
         <div class="modal-info-container">
             <img class="modal-img" src="${
               peopleData[personIndex].picture.large
@@ -93,56 +95,60 @@ function displayModal(peopleData, personIndex) {
             ].dob.date.replace(/(\d{4})-(\d{2})-(\d{2}).*/, "$2/$3/$1")}</p>
         </div>
     </div> 
-    <div class="modal-btn-container">
   `;
-  // Conditional to add navigation buttons on modal
-  if (personIndex === 0) {
-    modalDiv += `
-      <button type="button" id="modal-next" class="modal-next btn">Next</button>
-    `;
-  } else if (personIndex === peopleData.length - 1) {
-    modalDiv += `
-      <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
-    `;
-  } else {
-    modalDiv += `
-      <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
-      <button type="button" id="modal-next" class="modal-next btn">Next</button>
-    `;
+  // Conditional to add navigation buttons on modal if needed
+  if (galleryDiv.childElementCount !== 1) {
+    modalHtml += `<div class="modal-btn-container">`;
+    if (personIndex === 0) {
+      modalHtml += `
+        <button type="button" id="modal-next" class="modal-next btn">Next</button>
+      `;
+    } else if (personIndex === peopleData.length - 1) {
+      modalHtml += `
+        <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+      `;
+    } else {
+      modalHtml += `
+        <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+        <button type="button" id="modal-next" class="modal-next btn">Next</button>
+      `;
+    }
+    modalHtml += `</div>`;
   }
-  modalDiv += `</div></div>`;
-  document.querySelector("#gallery").insertAdjacentHTML("afterend", modalDiv);
+  modalHtml += `</div>`;
+  galleryDiv.insertAdjacentHTML("afterend", modalHtml);
 }
 
 /**
- * Gives functionality to modal buttons
+ * Enables modal buttons' functionality
  *
  * @param {array} peopleData - Array containing person objects
  */
 function enableModalButtons(peopleData) {
-  document.body.addEventListener("click", (e) => {
-    if (document.querySelector(".modal-container")) {
-      if (e.target.id === "modal-close-btn" || e.target.innerText === "X") {
-        document.querySelector(".modal-container").remove();
-      } else if (e.target.id === "modal-prev") {
-        const personIndex = +e.target.parentElement.parentElement.getAttribute(
-          "data-person-index"
-        );
-        for (let i = 0; i < peopleData.length; i++) {
-          if (i === personIndex) {
-            document.querySelector(".modal-container").remove();
-            displayModal(peopleData, i - 1);
-          }
+  const modalContainerDiv = document.querySelector(".modal-container");
+  modalContainerDiv.addEventListener("click", (e) => {
+    if (e.target.id === "modal-close-btn") {
+      modalContainerDiv.remove();
+    } else if (e.target.id === "modal-prev") {
+      const personIndex = +e.target.parentElement.parentElement.getAttribute(
+        "data-person-index"
+      );
+      for (let i = 0; i < peopleData.length; i++) {
+        if (i === personIndex) {
+          modalContainerDiv.remove();
+          displayModal(peopleData, i - 1);
+          enableModalButtons(peopleData);
         }
-      } else if (e.target.id === "modal-next") {
-        const personIndex = +e.target.parentElement.parentElement.getAttribute(
-          "data-person-index"
-        );
-        for (let i = 0; i < peopleData.length; i++) {
-          if (i === personIndex) {
-            document.querySelector(".modal-container").remove();
-            displayModal(peopleData, i + 1);
-          }
+      }
+    } else if (e.target.id === "modal-next") {
+      const personIndex = +e.target.parentElement.parentElement.getAttribute(
+        "data-person-index"
+      );
+      for (let i = 0; i < peopleData.length; i++) {
+        if (i === personIndex) {
+          modalContainerDiv.remove();
+          displayModal(peopleData, i + 1);
+          enableModalButtons(peopleData);
         }
       }
     }
@@ -174,17 +180,15 @@ function searchPeople(searchInput, peopleData) {
       `;
     } else {
       displayPeople(matchesFound);
-      enableModalButtons(matchesFound);
     }
   } else {
     displayPeople(peopleData);
-    enableModalButtons(peopleData);
   }
 }
 
 // START OF DOM MANIPULATION
 
-const apiUrl = "https://randomuser.me/api/?results=12&nat=us&seed=foobar";
+const apiUrl = "https://randomuser.me/api/?results=12&nat=us";
 
 // Add search bar using JavaScript when the page loads
 document.querySelector(".search-container").insertAdjacentHTML(
@@ -192,7 +196,7 @@ document.querySelector(".search-container").insertAdjacentHTML(
   `
   <form action="#" method="get">
       <input type="search" id="search-input" class="search-input" placeholder="Search...">
-      <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+      <button type="button" id="search-submit" class="search-submit">&#x1F50D;</button>
   </form>
 `
 );
@@ -202,8 +206,6 @@ document.querySelector(".search-container").insertAdjacentHTML(
   const allPeopleData = await fetchData(apiUrl);
 
   displayPeople(allPeopleData);
-
-  enableModalButtons(allPeopleData);
 
   const searchInput = document.querySelector("#search-input");
   searchInput.addEventListener("input", () => {
