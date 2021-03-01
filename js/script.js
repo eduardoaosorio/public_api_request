@@ -174,9 +174,7 @@ function searchPeople(searchInput, peopleData) {
     }
     if (matchesFound.length === 0) {
       document.querySelector("#gallery").innerHTML = `
-      <div class="card">
-            <h3 class="card-name cap">No matches found</h3>
-      </div>
+      <h3 class="card-name cap">No matches found</h3>
       `;
     } else {
       displayPeople(matchesFound);
