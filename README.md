@@ -1,7 +1,5 @@
 # public_api_request
 
-Techdegree Project 5
-
 ## Description
 
 Project to simulate an employee directory using the [Random User Generator API](https://randomuser.me/).
@@ -13,3 +11,10 @@ The idea behind the project is to show how to work with public APIs, making API 
 ### About Style Changes
 
 The original styles have been slightly modified. The most noticeable changes are the font, which has been updated to "Roboto", and the buttons, which now have black borders and background color.
+
+## Technologies
+
+- JavaScript
+- Fetch API
+- HTML
+- CSS
